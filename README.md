@@ -159,8 +159,8 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 ## Contact
 
-Your Name - [@yourhandle](https://twitter.com/yourhandle) - your.email@example.com
+Kanchan Renapurkar - [LinkeDin](www.linkedin.com/in/kanchan-renapurkar) - renapurkarkanchan@gmail.com
 
-Project Link: [https://github.com/yourusername/admin-panel-react](https://github.com/yourusername/admin-panel-react)
+Project Link: [Admin-Panel]((https://github.com/KanchanKR/Admin-Dashboard))
 
 ---
