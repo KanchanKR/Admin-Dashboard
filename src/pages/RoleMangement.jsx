@@ -1,60 +1,35 @@
 /* eslint-disable no-unused-vars */
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Header from "../componets/Header/Header";
+import { mockApi } from "../mockapi/mockApi";
 
 const RoleManagement = () => {
-  // Mock user data
-  const mockUsers = [
-    {
-      id: 1,
-      username: "johndoe",
-      email: "johndoe@example.com",
-      role: "Admin",
-      status: "Active",
-    },
-    {
-      id: 2,
-      username: "janedoe",
-      email: "janedoe@example.com",
-      role: "Manager",
-      status: "Inactive",
-    },
-    {
-      id: 3,
-      username: "samsmith",
-      email: "samsmith@example.com",
-      role: "Editor",
-      status: "Active",
-    },
-    {
-      id: 4,
-      username: "maryjohn",
-      email: "maryjohn@example.com",
-      role: "Viewer",
-      status: "Inactive",
-    },
-  ];
-
-  const [users, setUsers] = useState(mockUsers);
+  const [users, setUsers] = useState([]);
+  
   const [searchTerm, setSearchTerm] = useState("");
   const [roleAssignments, setRoleAssignments] = useState({});
   const [updatedUsers, setUpdatedUsers] = useState([]);
+  const [isEditing, setIsEditing] = useState({});
+  const [currentPage, setCurrentPage] = useState(1);
+  const [usersPerPage] = useState(5); // You can adjust the number of users per page
+
+  // Fetch users from mockApi when component mounts
+  useEffect(() => {
+    mockApi.getUsers().then((fetchedUsers) => {
+      setUsers(fetchedUsers);
+    });
+  }, []);
 
   // Handle search
   const handleSearch = (e) => {
     setSearchTerm(e.target.value);
   };
 
-  // Handle role and status updates
   const handleRoleChange = (id, newRole) => {
     setRoleAssignments((prev) => ({
       ...prev,
-      [id]: {
-        ...prev[id],
-        role: newRole,
-        status: prev[id]?.status || users.find((user) => user.id === id).status,
-      },
+      [id]: { ...prev[id], role: newRole, status: prev[id]?.status || users.find((user) => user.id === id).status },
     }));
     updateUserData(id, "role", newRole);
   };
@@ -62,38 +37,57 @@ const RoleManagement = () => {
   const handleStatusChange = (id, newStatus) => {
     setRoleAssignments((prev) => ({
       ...prev,
-      [id]: {
-        ...prev[id],
-        status: newStatus,
-        role: prev[id]?.role || users.find((user) => user.id === id).role,
-      },
+      [id]: { ...prev[id], status: newStatus, role: prev[id]?.role || users.find((user) => user.id === id).role },
     }));
     updateUserData(id, "status", newStatus);
   };
 
-  // Update user data in the state
-  const updateUserData = (id, field, value) => {
-    setUpdatedUsers((prev) => {
-      const existingUser = users.find((user) => user.id === id);
-      const updatedUser = { ...existingUser, [field]: value };
 
-      // If user already exists in the updatedUsers array, replace it with the updated one
-      const userIndex = prev.findIndex((user) => user.id === id);
-      if (userIndex !== -1) {
-        const newUsers = [...prev];
-        newUsers[userIndex] = updatedUser;
-        return newUsers;
+  const handleEditToggle = (userId) => {
+    setIsEditing((prev) => {
+      const newEditingState = { ...prev, [userId]: !prev[userId] };
+      // If "Save" is clicked (i.e., isEditing becomes false), save the changes
+      if (!newEditingState[userId]) {
+        // Save changes to role and status
+        const updatedUser = roleAssignments[userId] ? {
+          ...users.find((user) => user.id === userId),
+          ...roleAssignments[userId],
+        } : users.find((user) => user.id === userId);
+        setUpdatedUsers((prev) => [...prev, updatedUser]); // Update with the new user
       }
-
-      // Otherwise, add the updated user to the array
-      return [...prev, updatedUser];
+      return newEditingState;
     });
   };
+  
+
+  // Update user data in the state
+  const updateUserData = (id, field, value) => {
+    const updatedUser = users.find((user) => user.id === id);
+    if (updatedUser) {
+      updatedUser[field] = value;
+      mockApi.updateUser(updatedUser);
+      setUsers((prevUsers) => prevUsers.map((user) => (user.id === id ? { ...user, [field]: value } : user)));
+    }
+  };
+
+   
+
 
   // Filter users by search term
   const filteredUsers = users.filter((user) =>
-    user.username.toLowerCase().includes(searchTerm.toLowerCase())
+    user.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  // Pagination logic
+  const indexOfLastUser = currentPage * usersPerPage;
+  const indexOfFirstUser = indexOfLastUser - usersPerPage;
+  const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
+  const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
+
+  // Handle page change
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
 
   // Role and status color map
   const roleColors = {
@@ -155,10 +149,13 @@ const RoleManagement = () => {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                     Status
                   </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody className="bg-gray-800 divide-y divide-gray-700">
-                {filteredUsers.map((user) => (
+                {currentUsers.map((user) => (
                   <motion.tr
                     key={user.id}
                     initial={{ opacity: 0 }}
@@ -169,12 +166,12 @@ const RoleManagement = () => {
                       <div className="flex items-center">
                         <div className="flex-shrink-0 h-10 w-10">
                           <div className="h-10 w-10 rounded-full bg-gradient-to-r from-purple-400 to-blue-500 flex items-center justify-center text-white font-semibold">
-                            {user.username.charAt(0)}
+                            {user.name.charAt(0)}
                           </div>
                         </div>
                         <div className="ml-4">
                           <div className="text-sm font-medium text-gray-100">
-                            {user.username}
+                            {user.name}
                           </div>
                         </div>
                       </div>
@@ -186,7 +183,8 @@ const RoleManagement = () => {
                         onChange={(e) =>
                           handleRoleChange(user.id, e.target.value)
                         }
-                        className="bg-gray-700 text-white rounded-lg py-2 px-4 focus:outline-none"
+                        className={`bg-gray-700 text-white rounded-lg py-2 px-4 focus:outline-none ${isEditing[user.id] ? "" : "cursor-not-allowed"}`}
+                        disabled={!isEditing[user.id]}
                       >
                         <option value="Super Admin">Super Admin</option>
                         <option value="Admin">Admin</option>
@@ -203,16 +201,38 @@ const RoleManagement = () => {
                         onChange={(e) =>
                           handleStatusChange(user.id, e.target.value)
                         }
-                        className="bg-gray-700 text-white rounded-lg py-2 px-4 focus:outline-none"
+                        className={`bg-gray-700 text-white rounded-lg py-2 px-4 focus:outline-none ${isEditing[user.id] ? "" : "cursor-not-allowed"}`}
+                        disabled={!isEditing[user.id]}
                       >
                         <option value="Active">Active</option>
                         <option value="Inactive">Inactive</option>
                       </select>
                     </td>
+                    <td className="py-2 px-4">
+                      <button
+                        onClick={() => handleEditToggle(user.id)}
+                        className="bg-blue-500 text-white px-4 py-2 rounded-lg"
+                      >
+                        {isEditing[user.id] ? "Save" : "Edit"}
+                      </button>
+                    </td>
                   </motion.tr>
                 ))}
               </tbody>
             </table>
+          </div>
+
+          {/* Pagination */}
+          <div className="flex justify-center mt-4">
+            {Array.from({ length: totalPages }, (_, index) => (
+              <button
+                key={index}
+                onClick={() => handlePageChange(index + 1)}
+                className={`px-4 py-2 mx-1 rounded-lg ${currentPage === index + 1 ? "bg-blue-500 text-white" : "bg-gray-700 text-gray-300"}`}
+              >
+                {index + 1}
+              </button>
+            ))}
           </div>
         </div>
 
@@ -245,7 +265,7 @@ const RoleManagement = () => {
               <tbody>
                 {updatedUsers.map((user) => (
                   <tr key={user.id} className="border-t border-gray-700">
-                    <td className="py-2 px-4">{user.username}</td>
+                    <td className="py-2 px-4">{user.name}</td>
                     <td className="py-2 px-4">{user.email}</td>
                     <td className={`py-2 px-4 ${roleColors[user.role]}`}>
                       {user.role}

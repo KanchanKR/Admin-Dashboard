@@ -57,30 +57,38 @@ const UserAdd = ({ onAddUser }) => {
         <h3 className="text-xl font-semibold text-white">Add New User</h3>
       </div>
       <form onSubmit={handleSubmit}>
-        <div className="flex gap-4 mb-4">
+        <div className="flex flex-col sm:flex-row sm:gap-4 mb-4">
           <input
             type="text"
             id="name"
-            className={`w-1/4 px-4 py-2 bg-gray-700 text-white rounded-lg ${errors.name ? "border-red-500" : ""}`}
+            className={`w-full sm:w-1/4 px-4 py-2 bg-gray-700 text-white rounded-lg mb-4 sm:mb-0 ${
+              errors.name ? "border-red-500" : ""
+            }`}
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Username"
           />
           {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
-          
+
           <input
             type="email"
             id="email"
-            className={`w-1/4 px-4 py-2 bg-gray-700 text-white rounded-lg ${errors.email ? "border-red-500" : ""}`}
+            className={`w-full sm:w-1/4 px-4 py-2 bg-gray-700 text-white rounded-lg mb-4 sm:mb-0 ${
+              errors.email ? "border-red-500" : ""
+            }`}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Email"
           />
-          {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
-          
+          {errors.email && (
+            <p className="text-red-500 text-sm">{errors.email}</p>
+          )}
+
           <select
             id="role"
-            className={`w-1/4 px-4 py-2 bg-gray-700 text-white rounded-lg ${errors.role ? "border-red-500" : ""}`}
+            className={`w-full sm:w-1/4 px-4 py-2 bg-gray-700 text-white rounded-lg mb-4 sm:mb-0 ${
+              errors.role ? "border-red-500" : ""
+            }`}
             value={role}
             onChange={(e) => setRole(e.target.value)}
           >
@@ -92,17 +100,21 @@ const UserAdd = ({ onAddUser }) => {
             <option value="Contributor">Contributor</option>
           </select>
           {errors.role && <p className="text-red-500 text-sm">{errors.role}</p>}
-          
+
           <select
             id="status"
-            className={`w-1/4 px-4 py-2 bg-gray-700 text-white rounded-lg ${errors.status ? "border-red-500" : ""}`}
+            className={`w-full sm:w-1/4 px-4 py-2 bg-gray-700 text-white rounded-lg mb-4 sm:mb-0 ${
+              errors.status ? "border-red-500" : ""
+            }`}
             value={status}
             onChange={(e) => setStatus(e.target.value)}
           >
             <option value="Active">Active</option>
             <option value="Inactive">Inactive</option>
           </select>
-          {errors.status && <p className="text-red-500 text-sm">{errors.status}</p>}
+          {errors.status && (
+            <p className="text-red-500 text-sm">{errors.status}</p>
+          )}
         </div>
 
         {/* Submit Button */}

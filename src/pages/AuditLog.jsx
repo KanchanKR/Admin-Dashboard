@@ -1,37 +1,17 @@
-/* eslint-disable no-unused-vars */
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import Header from "../componets/Header/Header";
+import { mockApi } from "../mockapi/mockApi"; // Import mockApi
 
 const AuditLog = () => {
-  // Sample audit log data
-  const sampleLogData = [
-    {
-      id: 1,
-      user: "John Doe",
-      action: "Changed Role",
-      details: "Assigned Super Admin role to Jane Smith",
-      timestamp: "2024-11-26 10:30:00",
-    },
-    {
-      id: 2,
-      user: "Jane Smith",
-      action: "Updated Permission",
-      details: "Granted Write permission to Mark Johnson",
-      timestamp: "2024-11-26 11:15:00",
-    },
-    {
-      id: 3,
-      user: "Mark Johnson",
-      action: "Status Change",
-      details: "Set status to Inactive for Sarah Lee",
-      timestamp: "2024-11-26 12:00:00",
-    },
-  ];
-
-  const [logData, setLogData] = useState(sampleLogData);
+  const [logData, setLogData] = useState([]);
   const [eventFilter, setEventFilter] = useState("All");
   const [searchTerm, setSearchTerm] = useState("");
+
+  useEffect(() => {
+    // Fetch audit log data from mock API
+    mockApi.getAuditLog().then((logs) => setLogData(logs));
+  }, []);
 
   const handleSearch = (e) => {
     setSearchTerm(e.target.value);
@@ -80,9 +60,9 @@ const AuditLog = () => {
               onChange={handleEventFilter}
             >
               <option value="All">All Events</option>
+              <option value="Added User">Added User</option>
               <option value="Changed Role">Changed Role</option>
-              <option value="Updated Permission">Updated Permission</option>
-              <option value="Status Change">Status Change</option>
+              <option value="Deleted User">Deleted User</option>
             </select>
           </div>
         </div>
@@ -92,16 +72,16 @@ const AuditLog = () => {
           <table className="min-w-full divide-y divide-gray-700 text-center">
             <thead>
               <tr>
-                <th className="px-6 py-3  text-xs font-medium text-gray-400 uppercase tracking-wider text-left">
+                <th className="px-6 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider text-left">
                   User
                 </th>
-                <th className="px-6 py-3  text-xs font-medium text-gray-400 uppercase tracking-wider text-left">
+                <th className="px-6 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider text-left">
                   Action
                 </th>
-                <th className="px-6 py-3  text-xs font-medium text-gray-400 uppercase tracking-wider text-left">
+                <th className="px-6 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider text-left">
                   Details
                 </th>
-                <th className="px-6 py-3  text-xs font-medium text-gray-400 uppercase tracking-wider text-left">
+                <th className="px-6 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider text-left">
                   Timestamp
                 </th>
               </tr>
@@ -117,26 +97,24 @@ const AuditLog = () => {
                   >
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
-                        <div className="flex-shrink-0 h-10 w-10">
-                          <div className="h-10 w-10 rounded-full bg-gradient-to-r from-purple-400 to-blue-500 flex items-center justify-center text-white font-semibold">
-                            {log.user.charAt(0)}
-                          </div>
-                        </div>
-                        <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-100">
-                            {log.user}
-                          </div>
+                        <div className="text-sm font-medium text-gray-100">
+                          {log.user}
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-left">
                       {log.action}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-left">
-                      {log.details}
+                    <td className="px-6 py-4 whitespace-nowrap text-left flex-wrap">
+                      {log.details.split("\n").map((line, index) => (
+                        <span key={index}>
+                          {line}
+                          <br />
+                        </span>
+                      ))}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-left">
-                      {log.timestamp}
+                      {new Date(log.timestamp).toLocaleString()}
                     </td>
                   </motion.tr>
                 ))

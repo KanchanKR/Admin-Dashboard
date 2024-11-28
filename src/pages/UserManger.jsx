@@ -1,7 +1,7 @@
 import Header from '../componets/Header/Header'
 import StatCard from '../componets/state card/StatCard'
 import UsersTable from '../componets/users/UsersTable'
-// import UserAdd from '../componets/users/UserAdd'
+
 
 
 import { UserCheck, UserPlus, UsersIcon, UserX } from "lucide-react";
@@ -46,7 +46,7 @@ const UserManger = () => {
 
 				<UsersTable />
 
-        {/* <UserAdd /> */}
+      
 
 			</main>
 		</div>
