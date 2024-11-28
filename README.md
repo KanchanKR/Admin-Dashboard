@@ -18,6 +18,7 @@ This project is a responsive Admin Panel built using **React** with key features
 - **Edit Functionality**: Edit user names and emails, preserving roles and status.
 - **Pagination**: Manage users with pagination, showing limited users per page.
 - **Delete Confirmation**: Confirmation modal before deleting a user.
+- **Audit Log**: All the actions that a user can perform will be displayed in log tab.
 
 ## Technologies Used
 

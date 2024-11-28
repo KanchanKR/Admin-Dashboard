@@ -1,5 +1,9 @@
+/* eslint-disable no-unused-vars */
 import { useState } from "react";
 import { mockApi } from "../../mockapi/mockApi";
+import {toast} from "react-toastify"
+import PulseLoader from "react-spinners/PulseLoader"
+
 
 const UserAdd = ({ onAddUser }) => {
   const [name, setName] = useState("");
@@ -7,6 +11,7 @@ const UserAdd = ({ onAddUser }) => {
   const [role, setRole] = useState("Viewer");
   const [status, setStatus] = useState("Active");
   const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
 
   const validateForm = () => {
     const newErrors = {};
@@ -37,18 +42,25 @@ const UserAdd = ({ onAddUser }) => {
     if (!validateForm()) {
       return;
     }
-
+    setLoading(true)
+    try {
     // Add the new user to the mock API
     await mockApi.addUser({ name, email, role, status });
 
     // Refresh the users list after adding the new user
     onAddUser();
-
+    setLoading(false);
+    toast.success("User Added Successful!");
     // Reset form fields
     setName("");
     setEmail("");
     setRole("Viewer");
     setStatus("Active");
+    }catch (error) {
+      toast.error("Can't Add user");
+      console.error("Can't Add user", error);
+      setLoading(false);
+    }
   };
 
   return (
@@ -123,7 +135,7 @@ const UserAdd = ({ onAddUser }) => {
             type="submit"
             className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 focus:outline-none"
           >
-            Add User
+            {loading? <PulseLoader size={10} color="#fff" />: "Add User"}
           </button>
         </div>
       </form>
